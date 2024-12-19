@@ -1,5 +1,6 @@
 return {
     _all = {
-        ROOT = { "src" },
+        ROOT = { "gametabler" },
+        coverage = true,
     }
 }

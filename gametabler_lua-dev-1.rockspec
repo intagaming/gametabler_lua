@@ -8,7 +8,8 @@ description = {
    license = "*** please specify a license ***"
 }
 dependencies = {
-   "lua ~> 5.1"
+   "lua ~> 5.1",
+   "luacov == 0.16.0-1"
 }
 build = {
    type = "builtin",
