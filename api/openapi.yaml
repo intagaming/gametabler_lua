@@ -1,0 +1,212 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: "GameTabler API"
+  description: API to manage game tables/rooms
+
+paths:
+  /queueInfo/{queueId}:
+    get:
+      summary: Get the information for a queue
+      security:
+        - ApiKey: []
+      parameters:
+        - in: path
+          name: queueId
+          schema:
+            $ref: "#/components/schemas/QueueId"
+          required: true
+          description: The queue id to get the information
+      responses:
+        200:
+          description: Successfully get the queue information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueInfo"
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: No queue with the id `queueId` was found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /playerInfo/{playerId}:
+    get:
+      summary: Get the player's current state/info, like which queue they're currently in.
+      security:
+        - ApiKey: []
+      parameters:
+        - in: path
+          name: playerId
+          schema:
+            $ref: "#/components/schemas/PlayerId"
+          required: true
+          description: The player id to get the information
+      responses:
+        200:
+          description: Successfully get the player information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerInfo"
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: No player with the id `playerId` was found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /enqueue:
+    post:
+      summary: Enqueue the player with the id `playerId` into the queue with the id `queueId`.
+      security:
+        - ApiKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                queueId:
+                  $ref: "#/components/schemas/QueueId"
+                playerId:
+                  $ref: "#/components/schemas/PlayerId"
+      responses:
+        200:
+          description: Successfully enqueued the player with the id `playerId` into the queue with the id `queueId`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  queueId:
+                    $ref: "#/components/schemas/QueueId"
+                  playerId:
+                    $ref: "#/components/schemas/PlayerId"
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: No queue with the id `queueId` was found. Players are automatically created implicitly so players are always found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /dequeue:
+    post:
+      summary: Dequeue the player with the id `playerId` from the queue they're currently in.
+      security:
+        - ApiKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  $ref: "#/components/schemas/PlayerId"
+      responses:
+        200:
+          description: Successfully dequeued the player with the id `playerId` from the queue they're currently in.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  playerId:
+                    $ref: "#/components/schemas/PlayerId"
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: No player with the id `playerId` was found currently in any queue.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    QueueId:
+      description: The unique identifier of a queue
+      type: string
+    PlayerId:
+      description: The unique identifier of a player
+      type: string
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          description: A human readable error message
+          type: string
+    QueueInfo:
+      type: object
+      required:
+        - id
+        - description
+      properties:
+        id:
+          $ref: '#/components/schemas/QueueId'
+        description:
+          type: string
+          description: The description of the queue. This is used for user's discoverability only, not for the players.
+    PlayerInfo:
+      type: object
+      required:
+        - id
+        - currentQueueId
+      properties:
+        id:
+          $ref: '#/components/schemas/PlayerId'
+        currentQueueId:
+          type: string
+          description: The queue the player is currently in.
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+security:
+  - ApiKey: []
