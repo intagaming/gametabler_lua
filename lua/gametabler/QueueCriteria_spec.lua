@@ -1,4 +1,4 @@
-local QueueCriteria = require("gametabler.queue_criteria")
+local QueueCriteria = require("gametabler.QueueCriteria")
 local Player        = require("gametabler.Player")
 local Party         = require("gametabler.Party")
 

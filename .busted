@@ -1,6 +1,7 @@
 return {
     _all = {
-        ROOT = { "gametabler" },
+        lpath = "./lua/?.lua;./lua/?/?.lua",
+        ROOT = { "./lua" },
         coverage = true,
-    }
+    },
 }
