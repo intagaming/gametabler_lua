@@ -154,5 +154,27 @@ describe("QueueCriteria", function()
                 c:distribute(participants)
             end, "not enough players")
         end)
+
+        it("distributes with 2 leftover parties that can't be fully or partially distributed", function()
+            local c = QueueCriteria:new {
+                players_per_team = 3,
+                number_of_teams = 4,
+            }
+            local party1 = Party:new { players = { Player:new("party1-p1"), Player:new("party1-p2") } }
+            local party2 = Party:new { players = { Player:new("party2-p1"), Player:new("party2-p2") } }
+            local party3 = Party:new { players = { Player:new("party3-p1"), Player:new("party3-p2") } }
+            local party4 = Party:new { players = { Player:new("party4-p1"), Player:new("party4-p2") } }
+            local party5 = Party:new { players = { Player:new("party5-p1"), Player:new("party5-p2") } }
+            local party6 = Party:new { players = { Player:new("party6-p1"), Player:new("party6-p2") } }
+            local participants = { party1, party2, party3, party4, party5, party6 }
+
+            local teams = c:distribute(participants)
+            assert.are.same({
+                { party1.players[1], party1.players[2], party5.players[1] },
+                { party2.players[1], party2.players[2], party5.players[2] },
+                { party3.players[1], party3.players[2], party6.players[1] },
+                { party4.players[1], party4.players[2], party6.players[2] },
+            }, teams)
+        end)
     end)
 end)

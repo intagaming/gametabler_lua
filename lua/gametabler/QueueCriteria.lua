@@ -107,8 +107,8 @@ function QueueCriteria:distribute(participants)
                 -- Can't do any more party distribution.
                 for _, p in pairs(players_to_dist) do
                     table.insert(players, p)
-                    goto out
                 end
+                goto out
             end
 
             for _ = 1, num_of_players_to_recruit do
