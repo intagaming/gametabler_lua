@@ -21,7 +21,9 @@ function Queue:enqueue(player)
         table.insert(self.enqueued_players, player)
     else
         result.found = true
-        result.teams = self.config.criteria:distribute({ table.unpack(self.enqueued_players), player })
+        local participants = { table.unpack(self.enqueued_players) }
+        table.insert(participants, player)
+        result.teams = self.config.criteria:distribute(participants)
         self.enqueued_players = {}
     end
 
@@ -39,8 +41,6 @@ function Queue:dequeue(player)
             return true
         end
     end
-
-    return false
 end
 
 function Queue:is_in_queue(player)

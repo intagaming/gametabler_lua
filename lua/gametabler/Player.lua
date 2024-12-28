@@ -11,4 +11,8 @@ function Player:new(id, o)
     return setmetatable(o, Player)
 end
 
+function Player.__eq(a, b)
+    return a.id == b.id
+end
+
 return Player
