@@ -3,7 +3,8 @@ local cjson        = require("cjson")
 local queues_store = require("gametabler_web.store.queues")
 local Player       = require("gametabler.Player")
 
-local M            = {}
+
+local M = {}
 
 function M.enqueue()
     if not http_helper.ensure_http_method("POST") then
@@ -12,7 +13,18 @@ function M.enqueue()
 
     local body_json = http_helper.get_body_data()
     local body = cjson.decode(body_json)
-    -- TODO: verify body
+
+    local is_bad_request_data = false
+    if body.playerId == nil or body.queueId == nil
+        or string.match(body.playerId, "[^A-Za-z0-9]")
+        or string.match(body.queueId, "[^A-Za-z0-9]") then
+        is_bad_request_data = true
+    end
+    if is_bad_request_data then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = "Bad request data" })
+        return
+    end
 
     local queue = queues_store.queues[body.queueId]
     if queue == nil then
