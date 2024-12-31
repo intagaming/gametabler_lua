@@ -102,10 +102,20 @@ paths:
               schema:
                 type: object
                 properties:
-                  queueId:
-                    $ref: "#/components/schemas/QueueId"
-                  playerId:
-                    $ref: "#/components/schemas/PlayerId"
+                  found:
+                    type: boolean
+                  teams:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/PlayerId"
+        400:
+          description: Bad request, the reason is in the error's message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         401:
           description: Not authenticated
           content:

@@ -38,7 +38,7 @@ end
 function QueueCriteria:distribute(participants)
     local count = utils.count_participants(participants)
     if count < self:total_players() then
-        error("not enough players")
+        error("not enough players", 0)
     end
     ---@type Player[][]
     local teams = {}

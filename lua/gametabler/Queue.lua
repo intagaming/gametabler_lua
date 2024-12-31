@@ -11,9 +11,11 @@ function Queue:new(o)
     return setmetatable(o, Queue)
 end
 
+---@param player Player
+---@return {found: boolean, teams: Player[][]}
 function Queue:enqueue(player)
     if self:is_in_queue(player) then
-        error("already in queue")
+        error("already in queue", 0)
     end
 
     local result = { found = false, teams = {} }
@@ -32,7 +34,7 @@ end
 
 function Queue:dequeue(player)
     if not self:is_in_queue(player) then
-        error("not in queue")
+        error("not in queue", 0)
     end
 
     for k, v in pairs(self.enqueued_players) do

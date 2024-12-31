@@ -1,5 +1,5 @@
 local cjson = require("cjson")
-local NgxQueue = require("utils.NgxQueue")
+local NgxQueue = require("gametabler_web.utils.NgxQueue")
 local QueueConfig = require("gametabler.QueueConfig")
 local QueueCriteria = require("gametabler.QueueCriteria")
 

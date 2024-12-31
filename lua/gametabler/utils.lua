@@ -14,7 +14,7 @@ function M.count_participants(participants)
             count = count + #v.players
             goto continue
         end
-        error("unknown participant at index " .. k)
+        error("unknown participant at index " .. k, 0)
         ::continue::
     end
     return count
