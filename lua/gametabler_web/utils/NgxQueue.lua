@@ -4,6 +4,12 @@ local Queue = require("gametabler.Queue")
 ---@field queue_name string
 local NgxQueue = Queue:new()
 
+function NgxQueue:new(o)
+    local q = Queue:new(o)
+    ---@cast q NgxQueue
+    return q
+end
+
 function NgxQueue:enqueue(player)
     local queues = ngx.shared.queues
     self.enqueued_players = {}

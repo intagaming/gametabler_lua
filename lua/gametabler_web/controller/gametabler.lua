@@ -1,5 +1,6 @@
 local http_helper = require "gametabler_web.utils.http_helper"
 local cjson = require("cjson")
+
 local M = {}
 
 function M.enqueue()
