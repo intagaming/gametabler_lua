@@ -1,9 +1,10 @@
 local cjson = require("cjson")
-local Queue = require("gametabler.Queue")
+local NgxQueue = require("utils.NgxQueue")
 local QueueConfig = require("gametabler.QueueConfig")
 local QueueCriteria = require("gametabler.QueueCriteria")
 
 local M = {
+    ---@type NgxQueue[]
     queues = {}
 }
 
@@ -17,15 +18,14 @@ function M:init()
     local queues_config = cjson.decode(queues_config_json)
 
     for queue_name, queue_config in pairs(queues_config) do
-        -- TODO: queue ngx wrapper, using shared dict ngx.shared.queues
-        -- local queue = Queue:new {
-        --     config = QueueConfig:new {
-        --         criteria = QueueCriteria:new {
-        --             players_per_team = queue_config.criteria.playersPerTeam,
-        --             number_of_teams = queue_config.criteria.numberOfTeams
-        --         }
-        --     }
-        -- }
+        local queue = NgxQueue:new {
+            config = QueueConfig:new {
+                criteria = QueueCriteria:new {
+                    players_per_team = queue_config.criteria.playersPerTeam,
+                    number_of_teams = queue_config.criteria.numberOfTeams
+                }
+            }
+        }
         self.queues[queue_name] = queue
     end
 
