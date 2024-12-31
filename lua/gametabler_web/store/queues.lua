@@ -19,6 +19,7 @@ function M:init()
 
     for queue_name, queue_config in pairs(queues_config) do
         local queue = NgxQueue:new {
+            queue_name = queue_name,
             config = QueueConfig:new {
                 criteria = QueueCriteria:new {
                     players_per_team = queue_config.criteria.playersPerTeam,

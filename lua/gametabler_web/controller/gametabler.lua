@@ -1,9 +1,11 @@
-local http_helper  = require("gametabler_web.utils.http_helper")
-local cjson        = require("cjson")
-local queues_store = require("gametabler_web.store.queues")
-local Player       = require("gametabler.Player")
+local http_helper   = require("gametabler_web.utils.http_helper")
+local cjson         = require("cjson")
+local queues_store  = require("gametabler_web.store.queues")
+local Player        = require("gametabler.Player")
+local players_store = require("gametabler_web.store.players")
 
 
+--TODO: test this
 local M = {}
 
 function M.enqueue()
@@ -14,13 +16,10 @@ function M.enqueue()
     local body_json = http_helper.get_body_data()
     local body = cjson.decode(body_json)
 
-    local is_bad_request_data = false
     if body.playerId == nil or body.queueId == nil
         or string.match(body.playerId, "[^A-Za-z0-9]")
-        or string.match(body.queueId, "[^A-Za-z0-9]") then
-        is_bad_request_data = true
-    end
-    if is_bad_request_data then
+        or string.match(body.queueId, "[^A-Za-z0-9]")
+    then
         ngx.status = ngx.HTTP_BAD_REQUEST
         http_helper.respond_json({ message = "Bad request data" })
         return
@@ -52,6 +51,31 @@ function M.enqueue()
     http_helper.respond_json({
         found = result.found,
         teams = teams_string,
+    })
+end
+
+function M.player_info()
+    if not http_helper.ensure_http_method("GET") then
+        return
+    end
+
+    local params = ngx.req.get_uri_args()
+
+    if params.playerId == nil or string.match(params.playerId, "[^A-Za-z0-9]") then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = "Bad request data" })
+        return
+    end
+
+    local info = players_store.get_player_info(params.playerId)
+    local current_queue_name = cjson.null
+    if info ~= nil then
+        current_queue_name = info.current_queue_name or cjson.null
+    end
+
+    http_helper.respond_json({
+        id = params.playerId,
+        currentQueueName = current_queue_name,
     })
 end
 

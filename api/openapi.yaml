@@ -5,13 +5,13 @@ info:
   description: API to manage game tables/rooms
 
 paths:
-  /queueInfo/{queueId}:
+  /queueInfo:
     get:
       summary: Get the information for a queue
       security:
         - ApiKey: []
       parameters:
-        - in: path
+        - in: query
           name: queueId
           schema:
             $ref: "#/components/schemas/QueueId"
@@ -42,13 +42,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /playerInfo/{playerId}:
+  /playerInfo:
     get:
       summary: Get the player's current state/info, like which queue they're currently in.
       security:
         - ApiKey: []
       parameters:
-        - in: path
+        - in: query
           name: playerId
           schema:
             $ref: "#/components/schemas/PlayerId"
@@ -210,9 +210,10 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/PlayerId'
-        currentQueueId:
+        currentQueueName:
           type: string
           description: The queue the player is currently in.
+          nullable: true
   securitySchemes:
     ApiKey:
       type: apiKey

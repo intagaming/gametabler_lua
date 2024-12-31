@@ -45,9 +45,11 @@ function Queue:dequeue(player)
     end
 end
 
+---@param player Player
+---@return boolean
 function Queue:is_in_queue(player)
     for _, v in pairs(self.enqueued_players) do
-        if v == player then
+        if v.id == player.id then
             return true
         end
     end
