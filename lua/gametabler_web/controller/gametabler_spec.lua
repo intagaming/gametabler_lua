@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-set-field
 local cjson = require("cjson")
 local gametabler = require("gametabler_web.controller.gametabler")
 local queues_store = require("gametabler_web.store.queues")
@@ -26,7 +27,8 @@ describe("gametabler", function()
         -- Mock queues_store
         queues_store.queues = {
             queue1 = {
-                enqueue = function() return { found = true, teams = { { Player:new("player1") } } } end
+                enqueue = function() return { found = true, teams = { { Player:new("player1") } } } end,
+                dequeue = function() return true end
             }
         }
 
@@ -142,6 +144,50 @@ describe("gametabler", function()
             gametabler.player_info()
             assert.are.equal(200, ngx_mock.status)
             assert.are.same({ id = "player1", currentQueueName = cjson.null }, cjson.decode(ngx_mock.response))
+        end)
+    end)
+
+    describe("dequeue", function()
+        it("should return 405 if the request method is not POST", function()
+            ngx_mock.req.get_method = function() return "GET" end
+            gametabler.dequeue()
+            assert.are.equal(405, ngx_mock.status)
+            assert.are.same({ message = "Method not allowed" }, cjson.decode(ngx_mock.response))
+        end)
+
+        it("should return 400 if the request body contains invalid JSON", function()
+            ngx_mock.req.get_body_data = function() return 'invalid json' end
+            gametabler.dequeue()
+            assert.are.equal(400, ngx_mock.status)
+            assert.are.same({ message = "Bad request data" }, cjson.decode(ngx_mock.response))
+        end)
+
+        it("should return 400 if playerId is missing or invalid", function()
+            ngx_mock.req.get_body_data = function() return '{"playerId":""}' end
+            gametabler.dequeue()
+            assert.are.equal(400, ngx_mock.status)
+            assert.are.same({ message = "Bad request data" }, cjson.decode(ngx_mock.response))
+
+            ngx_mock.req.get_body_data = function() return '{"playerId":"player1@"}' end
+            gametabler.dequeue()
+            assert.are.equal(400, ngx_mock.status)
+            assert.are.same({ message = "Bad request data" }, cjson.decode(ngx_mock.response))
+        end)
+
+        it("should return 404 if player is not in any queue", function()
+            players_store.get_player_info = function() return nil end
+            gametabler.dequeue()
+            assert.are.equal(404, ngx_mock.status)
+            assert.are.same({ message = "No player with the id player1 was found currently in any queue." },
+                cjson.decode(ngx_mock.response))
+        end)
+
+        it("should return 200 if dequeue is successful", function()
+            -- Mock that the player is already in a queue
+            players_store.get_player_info = function() return { current_queue_name = "queue1" } end
+            gametabler.dequeue()
+            assert.are.equal(200, ngx_mock.status)
+            assert.are.same({ playerId = "player1" }, cjson.decode(ngx_mock.response))
         end)
     end)
 end)

@@ -1,10 +1,11 @@
-local http_helper   = require("gametabler_web.utils.http_helper")
-local cjson         = require("cjson")
-local queues_store  = require("gametabler_web.store.queues")
-local Player        = require("gametabler.Player")
+local http_helper = require("gametabler_web.utils.http_helper")
+local cjson = require("cjson")
+local queues_store = require("gametabler_web.store.queues")
+local Player = require("gametabler.Player")
 local players_store = require("gametabler_web.store.players")
 
-local M             = {}
+
+local M = {}
 
 function M.enqueue()
     if not http_helper.ensure_http_method("POST") then
@@ -24,7 +25,6 @@ function M.enqueue()
         http_helper.respond_json({ message = "Bad request data" })
         return
     end
-
 
     local is_bad_request_data = false
     if body.playerId == nil or body.queueId == nil
@@ -90,6 +90,57 @@ function M.player_info()
     http_helper.respond_json({
         id = params.playerId,
         currentQueueName = current_queue_name,
+    })
+end
+
+function M.dequeue()
+    if not http_helper.ensure_http_method("POST") then
+        return
+    end
+
+    local body_data = ngx.req.get_body_data()
+    if body_data == nil then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = "Bad request data" })
+        return
+    end
+
+    local ok, body = pcall(cjson.decode, body_data)
+    if not ok then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = "Bad request data" })
+        return
+    end
+
+    if body.playerId == nil or body.playerId == "" or string.match(body.playerId, "[^A-Za-z0-9]") then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = "Bad request data" })
+        return
+    end
+
+    local info = players_store.get_player_info(body.playerId)
+    if info == nil or info.current_queue_name == nil then
+        ngx.status = ngx.HTTP_NOT_FOUND
+        http_helper.respond_json({ message = "No player with the id " .. body.playerId .. " was found currently in any queue." })
+        return
+    end
+
+    local queue = queues_store.queues[info.current_queue_name]
+    if queue == nil then
+        ngx.status = ngx.HTTP_NOT_FOUND
+        http_helper.respond_json({ message = "queue not found" })
+        return
+    end
+
+    local ok, result = pcall(function() return queue:dequeue(Player:new(body.playerId)) end)
+    if not ok then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = result })
+        return
+    end
+
+    http_helper.respond_json({
+        playerId = body.playerId
     })
 end
 
