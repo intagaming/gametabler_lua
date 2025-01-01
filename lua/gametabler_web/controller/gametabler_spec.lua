@@ -1,27 +1,28 @@
 local cjson = require("cjson")
+local gametabler = require("gametabler_web.controller.gametabler")
 
-describe("gametabler_web.controller.gametabler", function()
-    local gametabler = require("gametabler_web.controller.gametabler")
-    local queues_store = require("gametabler_web.store.queues")
-    local players_store = require("gametabler_web.store.players")
-    local Player = require("gametabler.Player")
+local function setup_ngx_mock()
+    local ngx_mock = {
+        status = 200,
+        req = {
+            get_method = function() return "POST" end,
+            get_body_data = function() return '{"playerId":"player1","queueId":"queue1"}' end,
+            get_uri_args = function() return { playerId = "player1" } end,
+            read_body = function() end
+        },
+        say = function(msg) ngx_mock.response = msg end,
+        HTTP_BAD_REQUEST = 400,
+        HTTP_NOT_FOUND = 404,
+        HTTP_METHOD_NOT_ALLOWED = 405
+    }
+    return ngx_mock
+end
 
+describe("gametabler", function()
     local ngx_mock
 
     before_each(function()
-        ngx_mock = {
-            status = 200,
-            req = {
-                get_method = function() return "POST" end,
-                get_body_data = function() return '{"playerId":"player1","queueId":"queue1"}' end,
-                get_uri_args = function() return { playerId = "player1" } end,
-                read_body = function() end
-            },
-            say = function(msg) ngx_mock.response = msg end,
-            HTTP_BAD_REQUEST = 400,
-            HTTP_NOT_FOUND = 404,
-            HTTP_METHOD_NOT_ALLOWED = 405
-        }
+        ngx_mock = setup_ngx_mock()
         _G.ngx = ngx_mock
     end)
 

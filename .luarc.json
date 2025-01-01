@@ -1,5 +1,5 @@
 {
   "runtime.version": "LuaJIT",
-  "diagnostics.globals": ["ngx", "describe", "it", "before_each"],
+  "diagnostics.globals": ["ngx", "describe", "it", "before_each", "after_each"],
   "workspace.library": ["/home/an7/.luarocks/share/lua/5.1"]
 }
