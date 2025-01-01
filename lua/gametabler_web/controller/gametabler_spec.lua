@@ -1,10 +1,11 @@
 local cjson = require("cjson")
 local gametabler = require("gametabler_web.controller.gametabler")
+local queues_store = require("gametabler_web.store.queues")
+local players_store = require("gametabler_web.store.players")
+local Player = require("gametabler.Player")
 
 describe("gametabler", function()
     local ngx_mock
-    local queues_store
-    local players_store
 
     before_each(function()
         ngx_mock = {
@@ -22,20 +23,21 @@ describe("gametabler", function()
         }
         _G.ngx = ngx_mock
 
-        queues_store = {
-            queues = {}
+        -- Mock queues_store
+        queues_store.queues = {
+            queue1 = {
+                enqueue = function() return { found = true, teams = { { Player:new("player1") } } } end
+            }
         }
-        players_store = {
-            get_player_info = function() return nil end
-        }
-        _G.queues_store = queues_store
-        _G.players_store = players_store
+
+        -- Mock players_store
+        players_store.get_player_info = function() return nil end
     end)
 
     after_each(function()
         _G.ngx = nil
-        _G.queues_store = nil
-        _G.players_store = nil
+        queues_store.queues = {}
+        players_store.get_player_info = nil
     end)
 
     describe("enqueue", function()
@@ -99,7 +101,7 @@ describe("gametabler", function()
                     enqueue = function()
                         return {
                             found = true,
-                            teams = { { "player1" } }
+                            teams = { { Player:new("player1") } }
                         }
                     end
                 }
