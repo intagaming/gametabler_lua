@@ -30,6 +30,13 @@ describe("gametabler_web.controller.gametabler", function()
     end)
 
     describe("enqueue", function()
+        it("should return 405 if the request method is not POST", function()
+            ngx_mock.req.get_method = function() return "GET" end
+            gametabler.enqueue()
+            assert.are.equal(405, ngx_mock.status)
+            assert.are.same({ message = "Method not allowed" }, cjson.decode(ngx_mock.response))
+        end)
+
         it("should return 400 if playerId or queueId is missing or invalid", function()
             ngx_mock.req.get_body_data = function() return '{"playerId":"","queueId":"queue1"}' end
             gametabler.enqueue()
