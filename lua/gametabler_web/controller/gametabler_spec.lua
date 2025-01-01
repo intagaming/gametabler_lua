@@ -18,6 +18,18 @@ describe("gametabler_web.controller.gametabler", function()
             }
             gametabler.enqueue()
             assert.are.equal(400, ngx.status)
+
+            _G.ngx.req.get_body_data = function() return '{"playerId":"player1","queueId":""}' end
+            gametabler.enqueue()
+            assert.are.equal(400, ngx.status)
+
+            _G.ngx.req.get_body_data = function() return '{"playerId":"player1@","queueId":"queue1"}' end
+            gametabler.enqueue()
+            assert.are.equal(400, ngx.status)
+
+            _G.ngx.req.get_body_data = function() return '{"playerId":"player1","queueId":"queue1@"}' end
+            gametabler.enqueue()
+            assert.are.equal(400, ngx.status)
         end)
 
         it("should return 404 if queue is not found", function()

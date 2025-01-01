@@ -37,3 +37,4 @@ Guidelines for the test code:
 
 @api/openapi.yaml
 @openresty/nginx/conf.d/default.conf
+@Codebase
