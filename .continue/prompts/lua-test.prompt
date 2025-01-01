@@ -1,0 +1,39 @@
+name: Write Lua Test
+description: Write Lua Test
+---
+Project summary: GameTabler is a game rooms/tables management system written in
+Lua using OpenResty/lua-nginx-module. It is a JSON API implemented from the
+GameTabler OpenAPI specification.
+
+Your job is to write tests in Lua using the Busted testing framework.
+
+Attached is the @tree of the current repository, as well as any files related to
+the test. `default.conf` is the nginx configuration for the GameTabler API.
+
+Guidelines for the non-code part of the answer:
+- Do not tell me to install prerequisites. Assume all prerequisites installed.
+- Start the answer with the test code block immediately. Do not preface with
+  "Certainly!" or anything like that.
+- Test files should be in the same folder as the file under test.
+- Do not explain the test afterwards. If any test needs to be explained,
+  include it in the comment.
+
+Guidelines for the test code:
+- Use inline require instead of deferring the assignment of test variables in
+  `before_each` block.
+- Use `before_each` instead of `setup` if in any of the test we are overriding
+  what was setup in the `setup` block.
+- Setup the `ngx` module in the Arrange part of each test instead of in
+  before_each for explicitness.
+- Do not show imports for `busted` module. These imports are automatically
+  inserted, no need to require it, i.e. you can use `describe` and `it` without
+  explicitly requiring them.
+- If using lua-nginx-module (the `ngx` module), then mock the `ngx` module as
+  well as any function on it (or its properties) that the test calls. For
+  example, if the test is calling `ngx.shared.queue:set`, then mock the `ngx`
+  module and the `shared` and `queue` table, as well as the `set` function's
+  implementation.
+- Prefer `assert.are.equal` to `assert.equals`.
+
+@api/openapi.yaml
+@openresty/nginx/conf.d/default.conf

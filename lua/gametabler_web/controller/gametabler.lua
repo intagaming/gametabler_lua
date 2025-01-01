@@ -4,8 +4,6 @@ local queues_store  = require("gametabler_web.store.queues")
 local Player        = require("gametabler.Player")
 local players_store = require("gametabler_web.store.players")
 
-
---TODO: test this
 local M = {}
 
 function M.enqueue()
@@ -17,6 +15,7 @@ function M.enqueue()
     local body = cjson.decode(body_json)
 
     if body.playerId == nil or body.queueId == nil
+        or body.playerId == "" or body.queueId == ""
         or string.match(body.playerId, "[^A-Za-z0-9]")
         or string.match(body.queueId, "[^A-Za-z0-9]")
     then
@@ -61,7 +60,7 @@ function M.player_info()
 
     local params = ngx.req.get_uri_args()
 
-    if params.playerId == nil or string.match(params.playerId, "[^A-Za-z0-9]") then
+    if params.playerId == nil or params.playerId == "" or string.match(params.playerId, "[^A-Za-z0-9]") then
         ngx.status = ngx.HTTP_BAD_REQUEST
         http_helper.respond_json({ message = "Bad request data" })
         return
