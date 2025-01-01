@@ -6,6 +6,7 @@ function M.ensure_http_method(method)
         return true
     end
     ngx.status = 405
+    M.respond_json({ message = "Method not allowed" })
     return false
 end
 
