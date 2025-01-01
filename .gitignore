@@ -1,3 +1,3 @@
 *.report.out
 *.stats.out
-config/
+config/queues.json

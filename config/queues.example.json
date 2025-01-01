@@ -1,0 +1,14 @@
+{
+    "1vs1": {
+        "criteria": {
+            "playersPerTeam": 1,
+            "numberOfTeams": 2
+        }
+    },
+    "5vs5": {
+        "criteria": {
+            "playersPerTeam": 5,
+            "numberOfTeams": 2
+        }
+    }
+}
