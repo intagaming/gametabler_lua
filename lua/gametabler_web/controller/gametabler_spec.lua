@@ -1,36 +1,51 @@
 local cjson = require("cjson")
 local gametabler = require("gametabler_web.controller.gametabler")
 
-local function setup_ngx_mock()
-    local ngx_mock = {
-        status = 200,
-        req = {
-            get_method = function() return "POST" end,
-            get_body_data = function() return '{"playerId":"player1","queueId":"queue1"}' end,
-            get_uri_args = function() return { playerId = "player1" } end,
-            read_body = function() end
-        },
-        say = function(msg) ngx_mock.response = msg end,
-        HTTP_BAD_REQUEST = 400,
-        HTTP_NOT_FOUND = 404,
-        HTTP_METHOD_NOT_ALLOWED = 405
-    }
-    return ngx_mock
-end
-
 describe("gametabler", function()
     local ngx_mock
+    local queues_store
+    local players_store
 
     before_each(function()
-        ngx_mock = setup_ngx_mock()
+        ngx_mock = {
+            status = 200,
+            req = {
+                get_method = function() return "POST" end,
+                get_body_data = function() return '{"playerId":"player1","queueId":"queue1"}' end,
+                get_uri_args = function() return { playerId = "player1" } end,
+                read_body = function() end
+            },
+            say = function(msg) ngx_mock.response = msg end,
+            HTTP_BAD_REQUEST = 400,
+            HTTP_NOT_FOUND = 404,
+            HTTP_METHOD_NOT_ALLOWED = 405
+        }
         _G.ngx = ngx_mock
+
+        queues_store = {
+            queues = {}
+        }
+        players_store = {
+            get_player_info = function() return nil end
+        }
+        _G.queues_store = queues_store
+        _G.players_store = players_store
     end)
 
     after_each(function()
         _G.ngx = nil
+        _G.queues_store = nil
+        _G.players_store = nil
     end)
 
     describe("enqueue", function()
+        it("should return 400 if the request body contains invalid JSON", function()
+            ngx_mock.req.get_body_data = function() return 'invalid json' end
+            gametabler.enqueue()
+            assert.are.equal(400, ngx_mock.status)
+            assert.are.same({ message = "Bad request data" }, cjson.decode(ngx_mock.response))
+        end)
+
         it("should return 405 if the request method is not POST", function()
             ngx_mock.req.get_method = function() return "GET" end
             gametabler.enqueue()
@@ -84,7 +99,7 @@ describe("gametabler", function()
                     enqueue = function()
                         return {
                             found = true,
-                            teams = { { Player:new("player1") } }
+                            teams = { { "player1" } }
                         }
                     end
                 }

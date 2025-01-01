@@ -11,14 +11,15 @@ function M.enqueue()
         return
     end
 
-    local body_json = http_helper.get_body_data()
-    local body = cjson.decode(body_json)
+    local body_data = ngx.req.get_body_data()
+    if body_data == nil then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = "Bad request data" })
+        return
+    end
 
-    if body.playerId == nil or body.queueId == nil
-        or body.playerId == "" or body.queueId == ""
-        or string.match(body.playerId, "[^A-Za-z0-9]")
-        or string.match(body.queueId, "[^A-Za-z0-9]")
-    then
+    local ok, body = pcall(cjson.decode, body_data)
+    if not ok then
         ngx.status = ngx.HTTP_BAD_REQUEST
         http_helper.respond_json({ message = "Bad request data" })
         return
