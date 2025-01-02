@@ -34,13 +34,11 @@ describe("gametabler", function()
         queue1.enqueue = function(_, _)
             return { found = true, teams = { { Player:new("player1") } } }
         end
+        queue1.dequeue = function(_)
+            return true
+        end
         queues_store.queues = {
             queue1 = queue1,
-            ---@type NgxQueue
-            -- queue1 = {
-            --     enqueue = function() return { found = true, teams = { { Player:new("player1") } } } end,
-            --     dequeue = function() return true end
-            -- }
         }
 
         -- Mock players_store

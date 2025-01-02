@@ -49,4 +49,30 @@ function NgxQueue:enqueue(player)
     return result
 end
 
+---@param player Player
+---@return boolean
+function NgxQueue:dequeue(player)
+    local queues = ngx.shared.queues
+    ---@type Player[]
+    self.queue.enqueued_players = {}
+    for existing_player_id in string.gmatch(queues:get(self.queue_name) or "", "([^,]+)") do
+        self.queue.enqueued_players[#self.queue.enqueued_players + 1] = Player:new(existing_player_id)
+    end
+
+    local result = self.queue:dequeue(player)
+    if result then
+        players_store.set_player_info(player.id,
+            PlayerInfo:new { id = player.id, current_queue_name = nil })
+
+        local enqueued_player_ids = {}
+        for _, v in pairs(self.queue.enqueued_players) do
+            enqueued_player_ids[#enqueued_player_ids + 1] = v.id
+        end
+        queues:set(self.queue_name, table.concat(enqueued_player_ids, ","))
+        print("queues:set " .. self.queue_name .. " " .. table.concat(enqueued_player_ids, ","))
+    end
+
+    return result
+end
+
 return NgxQueue

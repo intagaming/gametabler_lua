@@ -114,4 +114,49 @@ describe("NgxQueue", function()
 
         assert.spy(ngx.shared.queues.set).was.called_with(ngx.shared.queues, "queue1", "player1,player2,player3")
     end)
+    
+    it("should dequeue a player and update the shared queues storage", function()
+        local queue_mock = {
+            dequeue = function(self, player)
+                -- Simulate removing the player from the enqueued_players list
+                for k, v in pairs(self.enqueued_players) do
+                    if v.id == player.id then
+                        table.remove(self.enqueued_players, k)
+                        return true
+                    end
+                end
+                return false
+            end,
+            enqueued_players = { Player:new("player1"), Player:new("player2") }
+        }
+        local ngx_queue = NgxQueue:new { queue_name = "queue1", queue = queue_mock }
+        local player = Player:new("player1")
+        spy.on(ngx.shared.queues, "set")
+        spy.on(players_store, "set_player_info")
+        local result = ngx_queue:dequeue(player)
+    
+        assert.is_true(result)
+        assert.spy(ngx.shared.queues.set).was.called_with(ngx.shared.queues, "queue1", "player2")
+        assert.spy(players_store.set_player_info).was.called_with("player1",
+            PlayerInfo:new { id = "player1", current_queue_name = nil })
+    end)
+    
+    it("should not dequeue a player not in the queue", function()
+        local queue_mock = {
+            dequeue = function(self, player)
+                -- Simulate trying to remove a player not in the queue
+                return false
+            end,
+            enqueued_players = { Player:new("player1"), Player:new("player2") }
+        }
+        local ngx_queue = NgxQueue:new { queue_name = "queue1", queue = queue_mock }
+        local player = Player:new("player3")
+        spy.on(ngx.shared.queues, "set")
+        spy.on(players_store, "set_player_info")
+        local result = ngx_queue:dequeue(player)
+    
+        assert.is_false(result)
+        assert.spy(ngx.shared.queues.set).was_not_called()
+        assert.spy(players_store.set_player_info).was_not_called()
+    end)
 end)
