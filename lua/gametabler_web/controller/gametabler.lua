@@ -48,8 +48,9 @@ function M.enqueue()
 
     local ok, result = pcall(function() return queue:enqueue(Player:new(body.playerId)) end)
     if not ok then
-        ngx.status = ngx.HTTP_BAD_REQUEST
-        http_helper.respond_json({ message = result })
+        ngx.log(ngx.ERR, result)
+        ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
+        http_helper.respond_json({ message = "Internal server error." })
         return
     end
 
@@ -121,8 +122,10 @@ function M.dequeue()
     local info = players_store.get_player_info(body.playerId)
     if info == nil or info.current_queue_name == nil then
         ngx.status = ngx.HTTP_NOT_FOUND
-        http_helper.respond_json({ message = "No player with the id " ..
-        body.playerId .. " was found currently in any queue." })
+        http_helper.respond_json({
+            message = "No player with the id " ..
+            body.playerId .. " was found currently in any queue."
+        })
         return
     end
 
@@ -135,8 +138,9 @@ function M.dequeue()
 
     local ok, result = pcall(function() return queue:dequeue(Player:new(body.playerId)) end)
     if not ok then
-        ngx.status = ngx.HTTP_BAD_REQUEST
-        http_helper.respond_json({ message = result })
+        ngx.log(ngx.ERR, result)
+        ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
+        http_helper.respond_json({ message = "Internal server error." })
         return
     end
 

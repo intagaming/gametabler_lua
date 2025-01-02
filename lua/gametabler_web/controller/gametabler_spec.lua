@@ -4,6 +4,7 @@ local gametabler = require("gametabler_web.controller.gametabler")
 local queues_store = require("gametabler_web.store.queues")
 local players_store = require("gametabler_web.store.players")
 local Player = require("gametabler.Player")
+local NgxQueue = require("gametabler_web.utils.NgxQueue")
 
 describe("gametabler", function()
     local ngx_mock
@@ -20,16 +21,26 @@ describe("gametabler", function()
             say = function(msg) ngx_mock.response = msg end,
             HTTP_BAD_REQUEST = 400,
             HTTP_NOT_FOUND = 404,
-            HTTP_METHOD_NOT_ALLOWED = 405
+            HTTP_METHOD_NOT_ALLOWED = 405,
+            HTTP_INTERNAL_SERVER_ERROR = 500,
+            log = function(level, message)
+                -- Mock log function to do nothing
+            end,
         }
         _G.ngx = ngx_mock
 
         -- Mock queues_store
+        local queue1 = NgxQueue:new()
+        queue1.enqueue = function(_, _)
+            return { found = true, teams = { { Player:new("player1") } } }
+        end
         queues_store.queues = {
-            queue1 = {
-                enqueue = function() return { found = true, teams = { { Player:new("player1") } } } end,
-                dequeue = function() return true end
-            }
+            queue1 = queue1,
+            ---@type NgxQueue
+            -- queue1 = {
+            --     enqueue = function() return { found = true, teams = { { Player:new("player1") } } } end,
+            --     dequeue = function() return true end
+            -- }
         }
 
         -- Mock players_store
@@ -86,15 +97,15 @@ describe("gametabler", function()
             assert.are.same({ message = "queue not found" }, cjson.decode(ngx_mock.response))
         end)
 
-        it("should return 400 if enqueue fails", function()
+        it("should return 500 if enqueue fails", function()
             queues_store.queues = {
                 queue1 = {
                     enqueue = function() error("enqueue failed", 0) end
                 }
             }
             gametabler.enqueue()
-            assert.are.equal(400, ngx_mock.status)
-            assert.are.same({ message = "enqueue failed" }, cjson.decode(ngx_mock.response))
+            assert.are.equal(500, ngx_mock.status)
+            assert.are.same({ message = "Internal server error." }, cjson.decode(ngx_mock.response))
         end)
 
         it("should return 200 and teams if enqueue is successful", function()
