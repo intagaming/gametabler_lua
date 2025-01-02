@@ -1,4 +1,3 @@
-local Queue         = require("gametabler.Queue")
 local players_store = require("gametabler_web.store.players")
 local PlayerInfo    = require("gametabler_web.store.players.PlayerInfo")
 local Player        = require("gametabler.Player")

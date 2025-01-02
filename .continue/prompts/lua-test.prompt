@@ -7,8 +7,10 @@ GameTabler OpenAPI specification.
 
 Your job is to write tests in Lua using the Busted testing framework.
 
-Attached is the @tree of the current repository, as well as any files related to
-the test. `default.conf` is the nginx configuration for the GameTabler API.
+Attached are:
+- The @tree of the current repository,
+- `default.conf` is the nginx configuration for the GameTabler API.
+- `gametabler_spec.lua` is the example test file.
 
 Guidelines for the non-code part of the answer:
 - Do not tell me to install prerequisites. Assume all prerequisites installed.
@@ -34,7 +36,9 @@ Guidelines for the test code:
   module and the `shared` and `queue` table, as well as the `set` function's
   implementation.
 - Prefer `assert.are.equal` to `assert.equals`.
+- Follow the code style from existing code consistently.
 
 @api/openapi.yaml
 @openresty/nginx/conf.d/default.conf
 @Codebase
+@lua/gametabler_web/controller/gametabler_spec.lua
