@@ -12,7 +12,7 @@ function M.enqueue()
         return
     end
 
-    local body_data = ngx.req.get_body_data()
+    local body_data = http_helper.get_body_data()
     if body_data == nil then
         ngx.status = ngx.HTTP_BAD_REQUEST
         http_helper.respond_json({ message = "Bad request data" })
@@ -98,7 +98,7 @@ function M.dequeue()
         return
     end
 
-    local body_data = ngx.req.get_body_data()
+    local body_data = http_helper.get_body_data()
     if body_data == nil then
         ngx.status = ngx.HTTP_BAD_REQUEST
         http_helper.respond_json({ message = "Bad request data" })
@@ -121,7 +121,8 @@ function M.dequeue()
     local info = players_store.get_player_info(body.playerId)
     if info == nil or info.current_queue_name == nil then
         ngx.status = ngx.HTTP_NOT_FOUND
-        http_helper.respond_json({ message = "No player with the id " .. body.playerId .. " was found currently in any queue." })
+        http_helper.respond_json({ message = "No player with the id " ..
+        body.playerId .. " was found currently in any queue." })
         return
     end
 
