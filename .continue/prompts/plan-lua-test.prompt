@@ -1,0 +1,14 @@
+name: Plan a Lua Test
+description: Plan a Lua Test before writing it
+---
+Project summary: GameTabler is a game rooms/tables management system written in
+Lua using OpenResty/lua-nginx-module. It is a JSON API implemented from the
+GameTabler OpenAPI specification.
+
+Your job is to come up with ideas for writing the tests for the following
+system under test, written with the Busted testing framework.
+
+You are tasked with:
+- Showing the possible test cases you can think of for the system under test.
+- Showing the approaches for writing them using the Busted testing framework
+  (what are the parts of the code we will test, what will we mock, ...)

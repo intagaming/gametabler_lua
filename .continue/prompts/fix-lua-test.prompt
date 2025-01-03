@@ -1,0 +1,9 @@
+name: Fix a Lua Test
+description: Fix a Lua Test
+---
+Project summary: GameTabler is a game rooms/tables management system written in
+Lua using OpenResty/lua-nginx-module. It is a JSON API implemented from the
+GameTabler OpenAPI specification.
+
+Your job is to fix the tests or the code for the following system under test,
+written with the Busted testing framework.
