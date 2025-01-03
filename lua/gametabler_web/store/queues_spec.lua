@@ -14,12 +14,12 @@ describe("queues.lua", function()
         if io.open.revert then
             io.open:revert()
         end
-
-        -- Restore cjson.decode to its original value
-        if cjson.decode.revert then
+    
+        -- Restore cjson.decode to its original value if it was stubbed
+        if cjson.decode and type(cjson.decode) == "table" and cjson.decode.revert then
             cjson.decode:revert()
         end
-
+    
         -- Restore ngx.log to its original value
         if ngx.log.revert then
             ngx.log:revert()
@@ -84,7 +84,7 @@ describe("queues.lua", function()
             end, "Invalid configuration for queue 'queue1': Missing required field: criteria")
 
             -- Assertions
-            assert.spy(log_spy).was_not.called()  -- Verify no logging occurred
+            assert.spy(log_spy).was_not.called() -- Verify no logging occurred
         end)
 
         it("should handle invalid playersPerTeam type", function()
@@ -101,7 +101,7 @@ describe("queues.lua", function()
                 return {
                     queue1 = {
                         criteria = {
-                            playersPerTeam = "five",  -- Invalid type
+                            playersPerTeam = "five", -- Invalid type
                             numberOfTeams = 2
                         }
                     }
@@ -117,7 +117,7 @@ describe("queues.lua", function()
             end, "Invalid configuration for queue 'queue1': playersPerTeam must be a number")
 
             -- Assertions
-            assert.spy(log_spy).was_not.called()  -- Verify no logging occurred
+            assert.spy(log_spy).was_not.called() -- Verify no logging occurred
         end)
 
         it("should handle invalid numberOfTeams type", function()
@@ -135,7 +135,7 @@ describe("queues.lua", function()
                     queue1 = {
                         criteria = {
                             playersPerTeam = 5,
-                            numberOfTeams = "two"  -- Invalid type
+                            numberOfTeams = "two" -- Invalid type
                         }
                     }
                 }
@@ -150,7 +150,7 @@ describe("queues.lua", function()
             end, "Invalid configuration for queue 'queue1': numberOfTeams must be a number")
 
             -- Assertions
-            assert.spy(log_spy).was_not.called()  -- Verify no logging occurred
+            assert.spy(log_spy).was_not.called() -- Verify no logging occurred
         end)
 
         it("should handle invalid criteria type", function()
@@ -166,7 +166,7 @@ describe("queues.lua", function()
             stub(cjson, "decode", function()
                 return {
                     queue1 = {
-                        criteria = "invalid"  -- Invalid type
+                        criteria = "invalid" -- Invalid type
                     }
                 }
             end)
@@ -180,7 +180,7 @@ describe("queues.lua", function()
             end, "Invalid configuration for queue 'queue1': Criteria must be a table")
 
             -- Assertions
-            assert.spy(log_spy).was_not.called()  -- Verify no logging occurred
+            assert.spy(log_spy).was_not.called() -- Verify no logging occurred
         end)
 
         it("should handle invalid queue configuration type", function()
@@ -195,7 +195,7 @@ describe("queues.lua", function()
             -- Mock cjson.decode to return a Lua table with invalid queue configuration type
             stub(cjson, "decode", function()
                 return {
-                    queue1 = "invalid"  -- Invalid type
+                    queue1 = "invalid" -- Invalid type
                 }
             end)
 
@@ -208,7 +208,25 @@ describe("queues.lua", function()
             end, "Invalid configuration for queue 'queue1': Queue configuration must be a table")
 
             -- Assertions
-            assert.spy(log_spy).was_not.called()  -- Verify no logging occurred
+            assert.spy(log_spy).was_not.called() -- Verify no logging occurred
+        end)
+
+        it("should handle io.open error", function()
+            -- Mock io.open to simulate an error
+            stub(io, "open", function()
+                return nil, "Failed to open file"
+            end)
+
+            -- Spy on ngx.log to verify no logging occurs
+            local log_spy = spy.on(ngx, "log")
+
+            -- Call the init function and expect an error
+            assert.has_error(function()
+                M:init()
+            end, "Failed to open file")
+
+            -- Assertions
+            assert.spy(log_spy).was_not.called() -- Verify no logging occurred
         end)
     end)
 end)
