@@ -1,3 +1,4 @@
 *.report.out
 *.stats.out
 config/queues.json
+.aider*
