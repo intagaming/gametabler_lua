@@ -94,6 +94,32 @@ function M.player_info()
     })
 end
 
+function M.queue_info()
+    if not http_helper.ensure_http_method("GET") then
+        return
+    end
+
+    local params = ngx.req.get_uri_args()
+
+    if params.queueId == nil or params.queueId == "" or string.match(params.queueId, "[^A-Za-z0-9]") then
+        ngx.status = ngx.HTTP_BAD_REQUEST
+        http_helper.respond_json({ message = "Bad request data" })
+        return
+    end
+
+    local queue = queues_store.queues[params.queueId]
+    if queue == nil then
+        ngx.status = ngx.HTTP_NOT_FOUND
+        http_helper.respond_json({ message = "queue not found" })
+        return
+    end
+
+    http_helper.respond_json({
+        id = params.queueId,
+        description = queue.queue_name
+    })
+end
+
 function M.dequeue()
     if not http_helper.ensure_http_method("POST") then
         return
