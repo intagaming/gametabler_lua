@@ -164,6 +164,53 @@ describe("gametabler", function()
         end)
     end)
 
+    describe("queue_info", function()
+        it("should return 405 if the request method is not GET", function()
+            ngx_mock.req.get_method = function() return "POST" end
+            gametabler.queue_info()
+            assert.are.equal(405, ngx_mock.status)
+            assert.are.same({ message = "Method not allowed" }, cjson.decode(ngx_mock.response))
+        end)
+
+        it("should return 400 if queueId is missing or invalid", function()
+            ngx_mock.req.get_method = function() return "GET" end
+            ngx_mock.req.get_uri_args = function() return { queueId = "" } end
+            gametabler.queue_info()
+            assert.are.equal(400, ngx_mock.status)
+            assert.are.same({ message = "Bad request data" }, cjson.decode(ngx_mock.response))
+
+            ngx_mock.req.get_uri_args = function() return { queueId = "queue1@" } end
+            gametabler.queue_info()
+            assert.are.equal(400, ngx_mock.status)
+            assert.are.same({ message = "Bad request data" }, cjson.decode(ngx_mock.response))
+        end)
+
+        it("should return 404 if queue is not found", function()
+            ngx_mock.req.get_method = function() return "GET" end
+            ngx_mock.req.get_uri_args = function() return { queueId = "queue1" } end
+            queues_store.queues = {}
+            gametabler.queue_info()
+            assert.are.equal(404, ngx_mock.status)
+            assert.are.same({ message = "queue not found" }, cjson.decode(ngx_mock.response))
+        end)
+
+        it("should return 200 and queue info if queue is found", function()
+            ngx_mock.req.get_method = function() return "GET" end
+            ngx_mock.req.get_uri_args = function() return { queueId = "queue1" } end
+            queues_store.queues = {
+                queue1 = {
+                    queue_name = "Test Queue"
+                }
+            }
+            gametabler.queue_info()
+            assert.are.equal(200, ngx_mock.status)
+            assert.are.same({
+                id = "queue1",
+                description = "Test Queue"
+            }, cjson.decode(ngx_mock.response))
+        end)
+    end)
+
     describe("dequeue", function()
         it("should return 405 if the request method is not POST", function()
             ngx_mock.req.get_method = function() return "GET" end
